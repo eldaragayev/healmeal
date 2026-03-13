@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   View,
   Text,
@@ -9,7 +9,6 @@ import {
   Linking,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import BottomSheet from '@gorhom/bottom-sheet';
 import { useThemeColors, Typography, Spacing } from '@/constants/theme';
 import { useNearbyChains } from '@/hooks/useNearbyChains';
 import { useSettings } from '@/hooks/useSettings';
@@ -33,7 +32,7 @@ export default function RestaurantsScreen() {
 
   const [selectedMeal, setSelectedMeal] = useState<Meal | null>(null);
   const [selectedMatch, setSelectedMatch] = useState<NearbyMatch | null>(null);
-  const sheetRef = useRef<BottomSheet>(null);
+  const [sheetVisible, setSheetVisible] = useState(false);
 
   const filteredRestaurants = useMemo(
     () => filterRestaurants(restaurants, filters),
@@ -45,20 +44,20 @@ export default function RestaurantsScreen() {
   const handleMealPress = useCallback((meal: Meal, match: NearbyMatch) => {
     setSelectedMeal(meal);
     setSelectedMatch(match);
-    sheetRef.current?.snapToIndex(0);
+    setSheetVisible(true);
   }, []);
 
   const handleRestaurantPress = useCallback((match: NearbyMatch) => {
-    // Open sheet with first meal of this restaurant
     const firstMeal = filterMeals(match.chain.meals, filters)[0] || match.chain.meals[0];
     if (firstMeal) {
       setSelectedMeal(firstMeal);
       setSelectedMatch(match);
-      sheetRef.current?.snapToIndex(0);
+      setSheetVisible(true);
     }
   }, [filters]);
 
   const handleSheetClose = useCallback(() => {
+    setSheetVisible(false);
     setSelectedMeal(null);
     setSelectedMatch(null);
   }, []);
@@ -70,7 +69,7 @@ export default function RestaurantsScreen() {
           Find Healthy Meals Near You
         </Text>
         <Text style={[styles.stateMessage, { color: colors.textSecondary }]}>
-          HealMeal needs your location to find restaurants near you.
+          healmeal needs your location to find restaurants near you.
         </Text>
         <Pressable
           onPress={requestPermission}
@@ -89,7 +88,7 @@ export default function RestaurantsScreen() {
           Location Access Denied
         </Text>
         <Text style={[styles.stateMessage, { color: colors.textSecondary }]}>
-          Please enable location access in your device settings to use HealMeal.
+          Please enable location access in your device settings to use healmeal.
         </Text>
         <Pressable
           onPress={() => Linking.openSettings()}
@@ -163,9 +162,9 @@ export default function RestaurantsScreen() {
       )}
 
       <MealDetailSheet
-        ref={sheetRef}
         meal={selectedMeal}
         match={selectedMatch}
+        visible={sheetVisible}
         onClose={handleSheetClose}
       />
     </SafeAreaView>

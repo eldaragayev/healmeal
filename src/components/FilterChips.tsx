@@ -1,13 +1,9 @@
 import { ScrollView, Text, Pressable, StyleSheet, Platform, View } from 'react-native';
+import { GlassView, isLiquidGlassAvailable } from 'expo-glass-effect';
 import { useThemeColors } from '@/constants/theme';
 import { Filters } from '@/api/types';
 
-let GlassView: any = View;
-if (Platform.OS === 'ios') {
-  try {
-    GlassView = require('expo-glass-effect').GlassView;
-  } catch {}
-}
+const hasGlass = Platform.OS === 'ios' && isLiquidGlassAvailable();
 
 interface FilterChipsProps {
   filters: Filters;
@@ -25,16 +21,22 @@ interface ChipProps {
 
 function Chip({ label, active, onPress }: ChipProps) {
   const colors = useThemeColors();
-  const useGlass = Platform.OS === 'ios' && GlassView !== View && !active;
 
-  if (useGlass) {
+  if (hasGlass) {
     return (
       <Pressable onPress={onPress}>
         <GlassView
-          style={styles.glassChip}
-          glassEffectStyle="regular"
+          style={styles.chip}
+          glassEffectStyle={active ? 'regular' : 'clear'}
+          tintColor={active ? colors.brandGreen : undefined}
+          isInteractive
         >
-          <Text style={[styles.chipText, { color: colors.chipInactiveText }]}>
+          <Text
+            style={[
+              styles.chipText,
+              { color: active ? colors.brandGreen : colors.text },
+            ]}
+          >
             {label}
           </Text>
         </GlassView>
@@ -124,13 +126,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   chip: {
-    paddingHorizontal: 16,
-    height: 34,
-    borderRadius: 17,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  glassChip: {
     paddingHorizontal: 16,
     height: 34,
     borderRadius: 17,

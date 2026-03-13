@@ -2,6 +2,8 @@ import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { StatusBar } from 'expo-status-bar';
 import { useColorScheme } from 'react-native';
+import { NativeTabs } from 'expo-router/unstable-native-tabs';
+import { Colors } from '@/constants/theme';
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
@@ -10,16 +12,11 @@ export default function RootLayout() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
         <StatusBar style="auto" />
-        {/* Expo Router renders matching routes as children */}
         <AppTabs />
       </ThemeProvider>
     </GestureHandlerRootView>
   );
 }
-
-// Inline tabs to keep single-file layout
-import { NativeTabs } from 'expo-router/unstable-native-tabs';
-import { Colors } from '@/constants/theme';
 
 function AppTabs() {
   const scheme = useColorScheme();
@@ -27,7 +24,6 @@ function AppTabs() {
 
   return (
     <NativeTabs
-      backgroundColor={colors.background}
       iconColor={{ default: colors.textTertiary, selected: colors.brandGreen }}
     >
       <NativeTabs.Trigger name="index">
