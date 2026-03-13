@@ -1,5 +1,6 @@
 import { View, Text, ScrollView, StyleSheet, Pressable } from 'react-native';
 import { Image } from 'expo-image';
+import { useState } from 'react';
 import { useThemeColors } from '@/constants/theme';
 import { MealCard } from './MealCard';
 import { Meal, NearbyMatch, Filters } from '@/api/types';
@@ -14,6 +15,7 @@ interface RestaurantCardProps {
 
 export function RestaurantCard({ match, filters, onMealPress, onRestaurantPress }: RestaurantCardProps) {
   const colors = useThemeColors();
+  const [logoFailed, setLogoFailed] = useState(false);
   const filteredMeals = filterMeals(match.chain.meals, filters);
 
   if (filteredMeals.length === 0) return null;
@@ -28,7 +30,18 @@ export function RestaurantCard({ match, filters, onMealPress, onRestaurantPress 
           { opacity: pressed ? 0.7 : 1 },
         ]}
       >
-        <Image source={{ uri: match.chain.logo }} style={styles.logo} contentFit="cover" />
+        {logoFailed ? (
+          <View style={[styles.logoFallback, { backgroundColor: colors.brandGreen }]}>
+            <Text style={styles.logoLetter}>{match.chain.name[0]}</Text>
+          </View>
+        ) : (
+          <Image
+            source={{ uri: match.chain.logo }}
+            style={styles.logo}
+            contentFit="cover"
+            onError={() => setLogoFailed(true)}
+          />
+        )}
         <View style={styles.headerText}>
           <Text style={[styles.name, { color: colors.text }]}>
             {match.chain.name}
@@ -76,6 +89,19 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 12,
+    backgroundColor: '#e5e7eb',
+  },
+  logoFallback: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  logoLetter: {
+    color: '#fff',
+    fontSize: 20,
+    fontWeight: '800',
   },
   headerText: {
     flex: 1,

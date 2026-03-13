@@ -6,7 +6,7 @@ export const MOCK_NEARBY: NearbyMatch[] = [
       id: 'nandos',
       name: "Nando's",
       aliases: ["Nando's Peri-Peri", 'Nandos'],
-      logo: 'https://logo.clearbit.com/nandos.co.uk',
+      logo: 'https://www.google.com/s2/favicons?domain=nandos.co.uk&sz=128',
       cuisine: 'Chicken',
       websiteUrl: 'https://www.nandos.co.uk',
       deliveryLinks: {
@@ -66,7 +66,7 @@ export const MOCK_NEARBY: NearbyMatch[] = [
       id: 'pizzaexpress',
       name: 'Pizza Express',
       aliases: ['PizzaExpress'],
-      logo: 'https://logo.clearbit.com/pizzaexpress.com',
+      logo: 'https://www.google.com/s2/favicons?domain=pizzaexpress.com&sz=128',
       cuisine: 'Italian',
       websiteUrl: 'https://www.pizzaexpress.com',
       deliveryLinks: {
@@ -116,7 +116,7 @@ export const MOCK_NEARBY: NearbyMatch[] = [
       id: 'wagamama',
       name: 'Wagamama',
       aliases: ['wagamama'],
-      logo: 'https://logo.clearbit.com/wagamama.com',
+      logo: 'https://www.google.com/s2/favicons?domain=wagamama.com&sz=128',
       cuisine: 'Japanese',
       websiteUrl: 'https://www.wagamama.com',
       deliveryLinks: {
@@ -166,7 +166,7 @@ export const MOCK_NEARBY: NearbyMatch[] = [
       id: 'leon',
       name: 'LEON',
       aliases: ['Leon', 'LEON Naturally Fast Food'],
-      logo: 'https://logo.clearbit.com/leon.co',
+      logo: 'https://www.google.com/s2/favicons?domain=leon.co&sz=128',
       cuisine: 'Mediterranean',
       websiteUrl: 'https://leon.co',
       deliveryLinks: {
@@ -216,7 +216,7 @@ export const MOCK_NEARBY: NearbyMatch[] = [
       id: 'chipotle',
       name: 'Chipotle',
       aliases: ['Chipotle Mexican Grill'],
-      logo: 'https://logo.clearbit.com/chipotle.com',
+      logo: 'https://www.google.com/s2/favicons?domain=chipotle.com&sz=128',
       cuisine: 'Mexican',
       websiteUrl: 'https://www.chipotle.com',
       deliveryLinks: {

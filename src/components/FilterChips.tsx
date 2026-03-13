@@ -88,6 +88,7 @@ export function FilterChips({
       horizontal
       showsHorizontalScrollIndicator={false}
       contentContainerStyle={styles.container}
+      style={styles.scroll}
     >
       {CALORIE_OPTIONS.map((cal) => (
         <Chip
@@ -119,8 +120,12 @@ export function FilterChips({
 }
 
 const styles = StyleSheet.create({
+  scroll: {
+    overflow: 'visible',
+  },
   container: {
     paddingHorizontal: 20,
+    paddingTop: 6,
     paddingBottom: 14,
     gap: 8,
     alignItems: 'center',

@@ -15,6 +15,7 @@ import { useSettings } from '@/hooks/useSettings';
 import { RestaurantCard } from '@/components/RestaurantCard';
 import { FilterChips } from '@/components/FilterChips';
 import { MealDetailSheet } from '@/components/MealDetailSheet';
+import { RestaurantDetail } from '@/components/RestaurantDetail';
 import { Filters, Meal, NearbyMatch } from '@/api/types';
 import { filterRestaurants, filterMeals, getUniqueCuisines } from '@/utils/filters';
 
@@ -33,6 +34,8 @@ export default function RestaurantsScreen() {
   const [selectedMeal, setSelectedMeal] = useState<Meal | null>(null);
   const [selectedMatch, setSelectedMatch] = useState<NearbyMatch | null>(null);
   const [sheetVisible, setSheetVisible] = useState(false);
+  const [restaurantDetailMatch, setRestaurantDetailMatch] = useState<NearbyMatch | null>(null);
+  const [restaurantDetailVisible, setRestaurantDetailVisible] = useState(false);
 
   const filteredRestaurants = useMemo(
     () => filterRestaurants(restaurants, filters),
@@ -48,13 +51,9 @@ export default function RestaurantsScreen() {
   }, []);
 
   const handleRestaurantPress = useCallback((match: NearbyMatch) => {
-    const firstMeal = filterMeals(match.chain.meals, filters)[0] || match.chain.meals[0];
-    if (firstMeal) {
-      setSelectedMeal(firstMeal);
-      setSelectedMatch(match);
-      setSheetVisible(true);
-    }
-  }, [filters]);
+    setRestaurantDetailMatch(match);
+    setRestaurantDetailVisible(true);
+  }, []);
 
   const handleSheetClose = useCallback(() => {
     setSheetVisible(false);
@@ -166,6 +165,20 @@ export default function RestaurantsScreen() {
         match={selectedMatch}
         visible={sheetVisible}
         onClose={handleSheetClose}
+      />
+
+      <RestaurantDetail
+        match={restaurantDetailMatch}
+        visible={restaurantDetailVisible}
+        onClose={() => {
+          setRestaurantDetailVisible(false);
+          setRestaurantDetailMatch(null);
+        }}
+        onMealPress={(meal, match) => {
+          setRestaurantDetailVisible(false);
+          setRestaurantDetailMatch(null);
+          handleMealPress(meal, match);
+        }}
       />
     </SafeAreaView>
   );
