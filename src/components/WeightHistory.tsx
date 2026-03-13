@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useThemeColors, Spacing } from '@/constants/theme';
+import { GlassButton } from './GlassButton';
 import { WeightEntry } from '@/api/types';
 
 interface WeightHistoryProps {
@@ -74,12 +75,13 @@ export function WeightHistory({ history, onAdd, onRemove, onClose }: WeightHisto
           value={weight}
           onChangeText={setWeight}
         />
-        <Pressable
+        <GlassButton
+          label="Add"
           onPress={handleAdd}
-          style={[styles.addButton, { backgroundColor: colors.brandGreen }]}
-        >
-          <Text style={styles.addButtonText}>Add</Text>
-        </Pressable>
+          tint={colors.brandGreen}
+          textColor="#fff"
+          style={styles.addButton}
+        />
       </View>
 
       {/* History list (newest first for display) */}
@@ -205,13 +207,6 @@ const styles = StyleSheet.create({
   },
   addButton: {
     paddingHorizontal: 20,
-    borderRadius: 10,
-    justifyContent: 'center',
-  },
-  addButtonText: {
-    color: '#fff',
-    fontWeight: '700',
-    fontSize: 15,
   },
   entry: {
     flexDirection: 'row',

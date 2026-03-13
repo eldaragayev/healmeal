@@ -16,6 +16,7 @@ import { RestaurantCard } from '@/components/RestaurantCard';
 import { FilterChips } from '@/components/FilterChips';
 import { MealDetailSheet } from '@/components/MealDetailSheet';
 import { RestaurantDetail } from '@/components/RestaurantDetail';
+import { GlassButton } from '@/components/GlassButton';
 import { Filters, Meal, NearbyMatch } from '@/api/types';
 import { filterRestaurants, filterMeals, getUniqueCuisines } from '@/utils/filters';
 
@@ -70,12 +71,12 @@ export default function RestaurantsScreen() {
         <Text style={[styles.stateMessage, { color: colors.textSecondary }]}>
           healmeal needs your location to find restaurants near you.
         </Text>
-        <Pressable
+        <GlassButton
+          label="Enable Location"
           onPress={requestPermission}
-          style={[styles.stateButton, { backgroundColor: colors.brandGreen }]}
-        >
-          <Text style={styles.stateButtonText}>Enable Location</Text>
-        </Pressable>
+          tint={colors.brandGreen}
+          textColor="#fff"
+        />
       </SafeAreaView>
     );
   }
@@ -89,12 +90,12 @@ export default function RestaurantsScreen() {
         <Text style={[styles.stateMessage, { color: colors.textSecondary }]}>
           Please enable location access in your device settings to use healmeal.
         </Text>
-        <Pressable
+        <GlassButton
+          label="Open Settings"
           onPress={() => Linking.openSettings()}
-          style={[styles.stateButton, { backgroundColor: colors.brandGreen }]}
-        >
-          <Text style={styles.stateButtonText}>Open Settings</Text>
-        </Pressable>
+          tint={colors.brandGreen}
+          textColor="#fff"
+        />
       </SafeAreaView>
     );
   }
@@ -106,12 +107,12 @@ export default function RestaurantsScreen() {
         <Text style={[styles.stateMessage, { color: colors.textSecondary }]}>
           {error}
         </Text>
-        <Pressable
+        <GlassButton
+          label="Try Again"
           onPress={retry}
-          style={[styles.stateButton, { backgroundColor: colors.brandGreen }]}
-        >
-          <Text style={styles.stateButtonText}>Try Again</Text>
-        </Pressable>
+          tint={colors.brandGreen}
+          textColor="#fff"
+        />
       </SafeAreaView>
     );
   }

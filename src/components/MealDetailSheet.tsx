@@ -14,6 +14,7 @@ import { Image } from 'expo-image';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useThemeColors, Typography } from '@/constants/theme';
 import { MacroDisplay } from './MacroDisplay';
+import { GlassButton } from './GlassButton';
 import { Meal, NearbyMatch } from '@/api/types';
 
 interface MealDetailSheetProps {
@@ -116,55 +117,33 @@ export function MealDetailSheet({ meal, match, visible, onClose }: MealDetailShe
             />
           </View>
 
-          <Pressable onPress={openDirections} style={[styles.mapPlaceholder, { backgroundColor: colors.surface, borderColor: colors.surfaceBorder }]}>
-            <Text style={{ fontSize: 28 }}>📍</Text>
-            <Text style={[styles.mapHint, { color: colors.textSecondary }]}>
-              Tap to open directions
-            </Text>
-            <Text style={[styles.mapAddress, { color: colors.textTertiary }]}>
-              {match.address}
-            </Text>
-          </Pressable>
+          <GlassButton
+            label="📍 Get Directions"
+            onPress={openDirections}
+            tint={colors.brandGreen}
+            textColor="#fff"
+            style={styles.actionButton}
+          />
 
           {deliveryLinks.length > 0 && (
             <View style={styles.deliveryRow}>
               {deliveryLinks.map(([key, url]) => (
-                <Pressable
+                <GlassButton
                   key={key}
+                  label={DELIVERY_LABELS[key] || key}
                   onPress={() => openDeliveryApp(url!)}
-                  style={({ pressed }) => [
-                    styles.deliveryButton,
-                    {
-                      backgroundColor: colors.surface,
-                      borderColor: colors.surfaceBorder,
-                      opacity: pressed ? 0.8 : 1,
-                    },
-                  ]}
-                >
-                  <Text style={[styles.deliveryText, { color: colors.text }]}>
-                    {DELIVERY_LABELS[key] || key}
-                  </Text>
-                </Pressable>
+                  style={styles.deliveryItem}
+                />
               ))}
             </View>
           )}
 
           {match.chain.websiteUrl && (
-            <Pressable
+            <GlassButton
+              label="Visit Restaurant Website"
               onPress={() => Linking.openURL(match.chain.websiteUrl)}
-              style={({ pressed }) => [
-                styles.websiteButton,
-                {
-                  backgroundColor: colors.surface,
-                  borderColor: colors.surfaceBorder,
-                  opacity: pressed ? 0.8 : 1,
-                },
-              ]}
-            >
-              <Text style={[styles.websiteText, { color: colors.textSecondary }]}>
-                Visit Restaurant Website
-              </Text>
-            </Pressable>
+              style={styles.websiteButton}
+            />
           )}
         </ScrollView>
       </SafeAreaView>
@@ -240,23 +219,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 16,
   },
-  mapPlaceholder: {
+  actionButton: {
     marginHorizontal: 20,
-    marginBottom: 14,
-    borderRadius: 14,
-    borderWidth: 1,
-    padding: 20,
-    alignItems: 'center',
-    gap: 4,
-  },
-  mapHint: {
-    fontSize: 14,
-    fontWeight: '600',
-    marginTop: 4,
-  },
-  mapAddress: {
-    fontSize: 12,
-    fontWeight: '400',
+    marginBottom: 12,
   },
   deliveryRow: {
     flexDirection: 'row',
@@ -264,26 +229,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     marginBottom: 10,
   },
-  deliveryButton: {
+  deliveryItem: {
     flex: 1,
-    padding: 14,
-    borderRadius: 12,
-    borderWidth: 1,
-    alignItems: 'center',
-  },
-  deliveryText: {
-    fontSize: 14,
-    fontWeight: '700',
   },
   websiteButton: {
     marginHorizontal: 20,
-    padding: 14,
-    borderRadius: 12,
-    borderWidth: 1,
-    alignItems: 'center',
-  },
-  websiteText: {
-    fontSize: 14,
-    fontWeight: '600',
+    marginTop: 4,
   },
 });

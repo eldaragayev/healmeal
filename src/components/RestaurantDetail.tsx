@@ -14,6 +14,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
 import { useThemeColors, Typography, Spacing } from '@/constants/theme';
 import { MacroDisplay } from './MacroDisplay';
+import { GlassButton } from './GlassButton';
 import { NearbyMatch, Meal } from '@/api/types';
 
 interface RestaurantDetailProps {
@@ -63,7 +64,6 @@ export function RestaurantDetail({ match, visible, onClose, onMealPress }: Resta
         </View>
 
         <ScrollView contentContainerStyle={styles.content}>
-          {/* Restaurant info */}
           <View style={styles.restaurantHeader}>
             <Text style={[styles.restaurantName, { color: colors.text }]}>
               {match.chain.name}
@@ -73,35 +73,27 @@ export function RestaurantDetail({ match, visible, onClose, onMealPress }: Resta
             </Text>
           </View>
 
-          {/* Directions */}
-          <Pressable
+          <GlassButton
+            label="Get Directions"
             onPress={openDirections}
-            style={({ pressed }) => [styles.directionsButton, { backgroundColor: colors.brandGreen, opacity: pressed ? 0.8 : 1 }]}
-          >
-            <Text style={styles.directionsText}>Get Directions</Text>
-          </Pressable>
+            tint={colors.brandGreen}
+            textColor="#fff"
+            style={styles.actionButton}
+          />
 
-          {/* Delivery buttons */}
           {deliveryLinks.length > 0 && (
             <View style={styles.deliveryRow}>
               {deliveryLinks.map(([key, url]) => (
-                <Pressable
+                <GlassButton
                   key={key}
+                  label={DELIVERY_LABELS[key] || key}
                   onPress={() => Linking.openURL(url!).catch(() => {})}
-                  style={({ pressed }) => [
-                    styles.deliveryButton,
-                    { backgroundColor: colors.surface, borderColor: colors.surfaceBorder, opacity: pressed ? 0.8 : 1 },
-                  ]}
-                >
-                  <Text style={[styles.deliveryButtonText, { color: colors.text }]}>
-                    {DELIVERY_LABELS[key] || key}
-                  </Text>
-                </Pressable>
+                  style={styles.deliveryItem}
+                />
               ))}
             </View>
           )}
 
-          {/* All meals */}
           <Text style={[styles.sectionTitle, { color: colors.text }]}>
             Menu ({match.chain.meals.length} meals)
           </Text>
@@ -129,19 +121,12 @@ export function RestaurantDetail({ match, visible, onClose, onMealPress }: Resta
             </Pressable>
           ))}
 
-          {/* Website */}
           {match.chain.websiteUrl && (
-            <Pressable
+            <GlassButton
+              label="Visit Restaurant Website"
               onPress={() => Linking.openURL(match.chain.websiteUrl)}
-              style={({ pressed }) => [
-                styles.websiteButton,
-                { backgroundColor: colors.surface, borderColor: colors.surfaceBorder, opacity: pressed ? 0.8 : 1 },
-              ]}
-            >
-              <Text style={[styles.websiteText, { color: colors.textSecondary }]}>
-                Visit Restaurant Website
-              </Text>
-            </Pressable>
+              style={styles.websiteButton}
+            />
           )}
         </ScrollView>
       </SafeAreaView>
@@ -150,114 +135,24 @@ export function RestaurantDetail({ match, visible, onClose, onMealPress }: Resta
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-  },
+  container: { flex: 1 },
+  header: { flexDirection: 'row', justifyContent: 'flex-end', paddingHorizontal: 20, paddingVertical: 12 },
   headerSpacer: { width: 50 },
-  closeButton: {
-    fontSize: 17,
-    fontWeight: '600',
-  },
-  content: {
-    paddingBottom: 40,
-  },
-  restaurantHeader: {
-    paddingHorizontal: Spacing.lg,
-    marginBottom: 16,
-  },
-  restaurantName: {
-    ...Typography.title,
-    lineHeight: 38,
-  },
-  restaurantMeta: {
-    fontSize: 14,
-    fontWeight: '500',
-    marginTop: 4,
-  },
-  directionsButton: {
-    marginHorizontal: Spacing.lg,
-    padding: 14,
-    borderRadius: 12,
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  directionsText: {
-    color: '#fff',
-    fontSize: 15,
-    fontWeight: '700',
-  },
-  deliveryRow: {
-    flexDirection: 'row',
-    gap: 8,
-    paddingHorizontal: Spacing.lg,
-    marginBottom: 24,
-  },
-  deliveryButton: {
-    flex: 1,
-    padding: 12,
-    borderRadius: 12,
-    borderWidth: 1,
-    alignItems: 'center',
-  },
-  deliveryButtonText: {
-    fontSize: 13,
-    fontWeight: '700',
-  },
-  sectionTitle: {
-    ...Typography.heading,
-    paddingHorizontal: Spacing.lg,
-    marginBottom: 8,
-  },
-  mealRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: Spacing.lg,
-    paddingVertical: 12,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    gap: 12,
-  },
-  mealImage: {
-    width: 60,
-    height: 60,
-    borderRadius: 10,
-  },
-  mealInfo: {
-    flex: 1,
-  },
-  mealName: {
-    fontSize: 15,
-    fontWeight: '600',
-    marginBottom: 4,
-  },
-  mealMeta: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  mealCalories: {
-    fontSize: 13,
-    fontWeight: '700',
-  },
-  chevron: {
-    fontSize: 20,
-    fontWeight: '300',
-  },
-  websiteButton: {
-    marginHorizontal: Spacing.lg,
-    marginTop: 20,
-    padding: 14,
-    borderRadius: 12,
-    borderWidth: 1,
-    alignItems: 'center',
-  },
-  websiteText: {
-    fontSize: 14,
-    fontWeight: '600',
-  },
+  closeButton: { fontSize: 17, fontWeight: '600' },
+  content: { paddingBottom: 40 },
+  restaurantHeader: { paddingHorizontal: Spacing.lg, marginBottom: 16 },
+  restaurantName: { ...Typography.title, lineHeight: 38 },
+  restaurantMeta: { fontSize: 14, fontWeight: '500', marginTop: 4 },
+  actionButton: { marginHorizontal: Spacing.lg, marginBottom: 12 },
+  deliveryRow: { flexDirection: 'row', gap: 8, paddingHorizontal: Spacing.lg, marginBottom: 24 },
+  deliveryItem: { flex: 1 },
+  sectionTitle: { ...Typography.heading, paddingHorizontal: Spacing.lg, marginBottom: 8 },
+  mealRow: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: Spacing.lg, paddingVertical: 12, borderBottomWidth: StyleSheet.hairlineWidth, gap: 12 },
+  mealImage: { width: 60, height: 60, borderRadius: 10 },
+  mealInfo: { flex: 1 },
+  mealName: { fontSize: 15, fontWeight: '600', marginBottom: 4 },
+  mealMeta: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  mealCalories: { fontSize: 13, fontWeight: '700' },
+  chevron: { fontSize: 20, fontWeight: '300' },
+  websiteButton: { marginHorizontal: Spacing.lg, marginTop: 20 },
 });
