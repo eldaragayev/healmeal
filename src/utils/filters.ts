@@ -8,6 +8,12 @@ export function filterMeals(meals: Meal[], filters: Filters): Meal[] {
     if (filters.highProtein && meal.protein < 30) {
       return false;
     }
+    if (filters.lowCarb && meal.carbs > 30) {
+      return false;
+    }
+    if (filters.lowFat && meal.fat > 15) {
+      return false;
+    }
     return true;
   });
 }

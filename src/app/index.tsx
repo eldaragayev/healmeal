@@ -26,13 +26,15 @@ const hasGlass = Platform.OS === 'ios' && isLiquidGlassAvailable();
 
 export default function RestaurantsScreen() {
   const colors = useThemeColors();
-  const { settings, updateSettings } = useSettings();
+  const { settings } = useSettings();
   const { status, restaurants, isLoading, error, retry, requestPermission } =
     useNearbyChains(settings.distanceRadius);
 
   const [filters, setFilters] = useState<Filters>({
     maxCalories: null,
     highProtein: false,
+    lowCarb: false,
+    lowFat: false,
     cuisine: null,
   });
   const [filterSheetVisible, setFilterSheetVisible] = useState(false);
@@ -53,6 +55,8 @@ export default function RestaurantsScreen() {
   const activeFilterCount =
     (filters.maxCalories !== null ? 1 : 0) +
     (filters.highProtein ? 1 : 0) +
+    (filters.lowCarb ? 1 : 0) +
+    (filters.lowFat ? 1 : 0) +
     (filters.cuisine !== null ? 1 : 0);
 
   const handleMealPress = useCallback((meal: Meal, match: NearbyMatch) => {
@@ -169,7 +173,7 @@ export default function RestaurantsScreen() {
           <Text style={[styles.stateMessage, { color: colors.textSecondary }]}>
             No restaurants match your filters.
           </Text>
-          <GlassButton label="Clear Filters" onPress={() => setFilters({ maxCalories: null, highProtein: false, cuisine: null })} />
+          <GlassButton label="Clear Filters" onPress={() => setFilters({ maxCalories: null, highProtein: false, lowCarb: false, lowFat: false, cuisine: null })} />
         </View>
       ) : (
         <ScrollView contentContainerStyle={styles.list} showsVerticalScrollIndicator={false}>
@@ -190,9 +194,7 @@ export default function RestaurantsScreen() {
         visible={filterSheetVisible}
         filters={filters}
         cuisines={cuisines}
-        calorieTarget={settings.calorieTarget}
         onFiltersChange={setFilters}
-        onCalorieTargetChange={(val) => updateSettings({ calorieTarget: val })}
         onClose={() => setFilterSheetVisible(false)}
       />
 

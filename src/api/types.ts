@@ -60,5 +60,7 @@ export const DEFAULT_SETTINGS: UserSettings = {
 export interface Filters {
   maxCalories: number | null;
   highProtein: boolean;
+  lowCarb: boolean;
+  lowFat: boolean;
   cuisine: string | null;
 }
