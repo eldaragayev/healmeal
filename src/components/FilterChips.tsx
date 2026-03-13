@@ -1,6 +1,13 @@
-import { ScrollView, Text, Pressable, StyleSheet } from 'react-native';
+import { ScrollView, Text, Pressable, StyleSheet, Platform, View } from 'react-native';
 import { useThemeColors } from '@/constants/theme';
 import { Filters } from '@/api/types';
+
+let GlassView: any = View;
+if (Platform.OS === 'ios') {
+  try {
+    GlassView = require('expo-glass-effect').GlassView;
+  } catch {}
+}
 
 interface FilterChipsProps {
   filters: Filters;
@@ -18,16 +25,39 @@ interface ChipProps {
 
 function Chip({ label, active, onPress }: ChipProps) {
   const colors = useThemeColors();
+  const useGlass = Platform.OS === 'ios' && GlassView !== View && !active;
+
+  if (useGlass) {
+    return (
+      <Pressable onPress={onPress}>
+        <GlassView
+          style={styles.glassChip}
+          glassEffectStyle="regular"
+        >
+          <Text style={[styles.chipText, { color: colors.chipInactiveText }]}>
+            {label}
+          </Text>
+        </GlassView>
+      </Pressable>
+    );
+  }
 
   return (
     <Pressable
       onPress={onPress}
       style={[
         styles.chip,
-        {
-          backgroundColor: active ? colors.chipActive : colors.chipInactive,
-          borderColor: active ? colors.chipActiveBorder : colors.chipInactiveBorder,
-        },
+        active
+          ? {
+              backgroundColor: colors.chipActive,
+              borderColor: colors.chipActiveBorder,
+              borderWidth: 1.5,
+            }
+          : {
+              backgroundColor: colors.chipInactive,
+              borderColor: colors.chipInactiveBorder,
+              borderWidth: 1,
+            },
       ]}
     >
       <Text
@@ -91,15 +121,25 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingBottom: 14,
     gap: 8,
+    alignItems: 'center',
   },
   chip: {
-    paddingHorizontal: 14,
-    paddingVertical: 7,
-    borderRadius: 20,
-    borderWidth: 1.5,
+    paddingHorizontal: 16,
+    height: 34,
+    borderRadius: 17,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  glassChip: {
+    paddingHorizontal: 16,
+    height: 34,
+    borderRadius: 17,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   chipText: {
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: '600',
+    lineHeight: 18,
   },
 });

@@ -1,47 +1,33 @@
-import { View, Text, ScrollView, StyleSheet, Platform } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, Pressable } from 'react-native';
 import { Image } from 'expo-image';
 import { useThemeColors } from '@/constants/theme';
 import { MealCard } from './MealCard';
 import { Meal, NearbyMatch, Filters } from '@/api/types';
 import { filterMeals } from '@/utils/filters';
 
-let GlassView: any = View;
-if (Platform.OS === 'ios') {
-  try {
-    GlassView = require('expo-glass-effect').GlassView;
-  } catch {}
-}
-
 interface RestaurantCardProps {
   match: NearbyMatch;
   filters: Filters;
   onMealPress: (meal: Meal, match: NearbyMatch) => void;
+  onRestaurantPress: (match: NearbyMatch) => void;
 }
 
-export function RestaurantCard({ match, filters, onMealPress }: RestaurantCardProps) {
+export function RestaurantCard({ match, filters, onMealPress, onRestaurantPress }: RestaurantCardProps) {
   const colors = useThemeColors();
   const filteredMeals = filterMeals(match.chain.meals, filters);
 
   if (filteredMeals.length === 0) return null;
 
-  const useGlass = Platform.OS === 'ios' && GlassView !== View;
-  const CardContainer = useGlass ? GlassView : View;
-  const cardProps = useGlass
-    ? { style: [styles.card, { borderRadius: 20 }], glassEffectStyle: 'regular' as const }
-    : {
-        style: [
-          styles.card,
-          {
-            backgroundColor: colors.surface,
-            borderColor: colors.surfaceBorder,
-            borderWidth: 1,
-          },
-        ],
-      };
-
   return (
-    <CardContainer {...cardProps}>
-      <View style={styles.header}>
+    <View style={styles.card}>
+      {/* Tappable restaurant header */}
+      <Pressable
+        onPress={() => onRestaurantPress(match)}
+        style={({ pressed }) => [
+          styles.header,
+          { opacity: pressed ? 0.7 : 1 },
+        ]}
+      >
         <Image source={{ uri: match.chain.logo }} style={styles.logo} contentFit="cover" />
         <View style={styles.headerText}>
           <Text style={[styles.name, { color: colors.text }]}>
@@ -51,8 +37,10 @@ export function RestaurantCard({ match, filters, onMealPress }: RestaurantCardPr
             {match.distance.toFixed(1)} mi · {match.chain.cuisine}
           </Text>
         </View>
-      </View>
+        <Text style={[styles.chevron, { color: colors.textTertiary }]}>›</Text>
+      </Pressable>
 
+      {/* Meal carousel */}
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
@@ -66,42 +54,54 @@ export function RestaurantCard({ match, filters, onMealPress }: RestaurantCardPr
           />
         ))}
       </ScrollView>
-    </CardContainer>
+
+      {/* Separator */}
+      <View style={[styles.separator, { backgroundColor: colors.surfaceBorder }]} />
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   card: {
-    marginHorizontal: 16,
-    marginBottom: 14,
-    borderRadius: 20,
-    padding: 14,
+    paddingTop: 4,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
+    gap: 12,
+    paddingHorizontal: 20,
     marginBottom: 12,
   },
   logo: {
-    width: 40,
-    height: 40,
+    width: 44,
+    height: 44,
     borderRadius: 12,
   },
   headerText: {
     flex: 1,
   },
   name: {
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: '700',
     letterSpacing: -0.3,
   },
   subtitle: {
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: '500',
+    marginTop: 1,
+  },
+  chevron: {
+    fontSize: 22,
+    fontWeight: '300',
   },
   mealScroll: {
-    gap: 10,
-    paddingBottom: 4,
+    gap: 12,
+    paddingHorizontal: 20,
+    paddingBottom: 16,
+  },
+  separator: {
+    height: StyleSheet.hairlineWidth,
+    marginHorizontal: 20,
+    marginBottom: 12,
   },
 });

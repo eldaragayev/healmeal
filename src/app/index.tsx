@@ -17,7 +17,7 @@ import { RestaurantCard } from '@/components/RestaurantCard';
 import { FilterChips } from '@/components/FilterChips';
 import { MealDetailSheet } from '@/components/MealDetailSheet';
 import { Filters, Meal, NearbyMatch } from '@/api/types';
-import { filterRestaurants, getUniqueCuisines } from '@/utils/filters';
+import { filterRestaurants, filterMeals, getUniqueCuisines } from '@/utils/filters';
 
 export default function RestaurantsScreen() {
   const colors = useThemeColors();
@@ -47,6 +47,16 @@ export default function RestaurantsScreen() {
     setSelectedMatch(match);
     sheetRef.current?.snapToIndex(0);
   }, []);
+
+  const handleRestaurantPress = useCallback((match: NearbyMatch) => {
+    // Open sheet with first meal of this restaurant
+    const firstMeal = filterMeals(match.chain.meals, filters)[0] || match.chain.meals[0];
+    if (firstMeal) {
+      setSelectedMeal(firstMeal);
+      setSelectedMatch(match);
+      sheetRef.current?.snapToIndex(0);
+    }
+  }, [filters]);
 
   const handleSheetClose = useCallback(() => {
     setSelectedMeal(null);
@@ -112,8 +122,8 @@ export default function RestaurantsScreen() {
     <SafeAreaView style={[styles.screen, { backgroundColor: colors.background }]} edges={['top']}>
       <View style={styles.header}>
         <Text style={[Typography.title, { lineHeight: 38 }]}>
-          <Text style={{ color: colors.text }}>Heal</Text>
-          <Text style={{ color: colors.brandGreen }}>Meal</Text>
+          <Text style={{ color: colors.text }}>heal</Text>
+          <Text style={{ color: colors.brandGreen }}>meal</Text>
         </Text>
         <Text style={[styles.headerSubtitle, { color: colors.textSecondary }]}>
           Within {settings.distanceRadius} miles of you
@@ -146,6 +156,7 @@ export default function RestaurantsScreen() {
               match={match}
               filters={filters}
               onMealPress={handleMealPress}
+              onRestaurantPress={handleRestaurantPress}
             />
           ))}
         </ScrollView>

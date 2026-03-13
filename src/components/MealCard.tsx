@@ -18,22 +18,23 @@ export function MealCard({ meal, onPress }: MealCardProps) {
       style={({ pressed }) => [
         styles.container,
         {
-          backgroundColor: colors.surface,
-          borderColor: colors.surfaceBorder,
           opacity: pressed ? 0.85 : 1,
+          transform: [{ scale: pressed ? 0.97 : 1 }],
         },
       ]}
     >
       <View style={styles.imageContainer}>
         <Image source={{ uri: meal.photo }} style={styles.image} contentFit="cover" />
         <View style={styles.calorieBadge}>
-          <Text style={styles.calorieText}>{meal.calories} cal</Text>
+          <Text style={styles.calorieText}>{meal.calories}</Text>
+          <Text style={styles.calorieUnit}>cal</Text>
         </View>
       </View>
       <View style={styles.info}>
-        <Text style={[styles.name, { color: colors.text }]} numberOfLines={2}>
+        <Text style={[styles.name, { color: colors.text }]} numberOfLines={1}>
           {meal.name}
         </Text>
+        <View style={[styles.divider, { backgroundColor: colors.surfaceBorder }]} />
         <MacroDisplay protein={meal.protein} carbs={meal.carbs} fat={meal.fat} />
       </View>
     </Pressable>
@@ -42,39 +43,53 @@ export function MealCard({ meal, onPress }: MealCardProps) {
 
 const styles = StyleSheet.create({
   container: {
-    width: 130,
-    borderRadius: 14,
-    borderWidth: 1,
+    width: 156,
+    borderRadius: 16,
     overflow: 'hidden',
   },
   imageContainer: {
-    height: 80,
+    height: 96,
     position: 'relative',
   },
   image: {
     width: '100%',
     height: '100%',
+    borderRadius: 16,
   },
   calorieBadge: {
     position: 'absolute',
-    bottom: 4,
-    right: 4,
-    backgroundColor: 'rgba(0,0,0,0.55)',
-    borderRadius: 6,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
+    bottom: 6,
+    right: 6,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    borderRadius: 8,
+    paddingHorizontal: 7,
+    paddingVertical: 3,
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    gap: 2,
   },
   calorieText: {
     color: '#fff',
+    fontSize: 12,
+    fontWeight: '800',
+  },
+  calorieUnit: {
+    color: 'rgba(255,255,255,0.7)',
     fontSize: 9,
-    fontWeight: '700',
+    fontWeight: '600',
   },
   info: {
-    padding: 8,
+    paddingHorizontal: 4,
+    paddingTop: 8,
+    paddingBottom: 4,
   },
   name: {
-    fontSize: 11,
-    fontWeight: '700',
-    lineHeight: 14,
+    fontSize: 13,
+    fontWeight: '600',
+    lineHeight: 17,
+  },
+  divider: {
+    height: StyleSheet.hairlineWidth,
+    marginVertical: 6,
   },
 });
