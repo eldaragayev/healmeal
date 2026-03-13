@@ -12,7 +12,7 @@ You're hungry, want to eat out or order in, but you're trying to eat healthier, 
 
 Two tabs only: **Restaurants** and **Settings**. No auth, no onboarding (built later).
 
-Future additions (out of scope for MVP): Meals tab (search meals directly), Me page (calorie breakdown, weight management, meal scanner, manual meal logging).
+Future additions (out of scope for MVP): Meals tab (search meals directly), Me page (calorie breakdown, meal scanner, manual meal logging).
 
 ---
 
@@ -23,6 +23,8 @@ Future additions (out of scope for MVP): Meals tab (search meals directly), Me p
 | Framework | Expo SDK 55 (React Native 0.83, React 19.2) |
 | Navigation | Expo Router v55 with native bottom tabs |
 | Liquid Glass | `expo-glass-effect` (official) for custom glass views; native tabs/toolbars get Liquid Glass automatically on iOS 26 |
+| Bottom Sheet | `@gorhom/bottom-sheet` for meal detail sheet |
+| Places API | Google Places API (Nearby Search) via backend proxy |
 | Maps | `react-native-maps` for restaurant pin in meal detail sheet |
 | Storage | AsyncStorage for local settings and weight history |
 | Engine | Hermes v1 |
@@ -79,7 +81,7 @@ System-driven light/dark mode. Same layout and structure, colors adapt. Glass ma
 
 ## Screen: Restaurants
 
-The main discovery screen. Vertically scrolling list of restaurant cards.
+The main discovery screen. Vertically scrolling list of restaurant cards, sorted by distance (nearest first).
 
 ### Layout (top to bottom)
 
@@ -91,7 +93,7 @@ The main discovery screen. Vertically scrolling list of restaurant cards.
 
 Horizontal scrollable chips at the top of the screen:
 - Calorie filters: "Under 400 cal", "Under 500 cal", "Under 600 cal"
-- Macro filters: "High Protein"
+- Macro filters: "High Protein" (meals with >= 30g protein)
 - Cuisine filters: "Italian", "Japanese", "Mexican", "Indian", etc.
 
 Active chip: green-tinted background with green border. Inactive: glass-styled chip. Multiple filters can be active simultaneously. Filters reduce the visible meals within each restaurant card. Restaurants with no matching meals are hidden.
@@ -109,11 +111,20 @@ Each card is a frosted glass container (`expo-glass-effect` on iOS 26, regular s
 - **Top half**: Meal photo (80px height) with calorie badge overlaid bottom-right (blurred dark background, white text)
 - **Bottom half**: Meal name (weight 700, 11px) + macro row: `P 42g` `C 12g` `F 14g` color-coded
 
+### States
+
+- **Loading**: Skeleton placeholders for restaurant cards while fetching location + chain data
+- **Location permission not requested**: Prompt card asking user to enable location with explanation ("HealMeal needs your location to find restaurants near you")
+- **Location permission denied**: Message with button to open system settings
+- **No matches**: "No healthy restaurants nearby — try increasing your radius in Settings"
+- **All meals filtered out**: Restaurant card is hidden when no meals match active filters
+- **Network error**: Retry button with "Couldn't load restaurants. Check your connection."
+
 ---
 
 ## Screen: Meal Detail (Bottom Sheet)
 
-Triggered by tapping a meal card. Slides up as a bottom sheet modal.
+Triggered by tapping a meal card. Slides up as a bottom sheet modal using `@gorhom/bottom-sheet`.
 
 ### Layout (top to bottom)
 
@@ -122,7 +133,7 @@ Triggered by tapping a meal card. Slides up as a bottom sheet modal.
 3. **Meal info**: Large bold name (22px, weight 800) + restaurant name + distance
 4. **Macro breakdown**: Three equal cards side by side — Protein (green), Carbs (blue), Fat (amber). Large numbers (24px, weight 800), uppercase labels
 5. **Map**: Shows restaurant location with pin. Tap triggers system action sheet to choose navigation app (Apple Maps / Google Maps / Waze)
-6. **Order buttons**: Side by side — region-aware delivery apps. UK: Uber Eats + Deliveroo. US: Uber Eats + DoorDash. Deep link to restaurant in each app, falls back to App Store if not installed
+6. **Order buttons**: Side by side — show all available delivery apps from the chain's `deliveryLinks` (Uber Eats, Deliveroo, DoorDash). These are chain-level search links that land on the restaurant's listing within the delivery app. Deep link to app, falls back to App Store if not installed
 7. **Website link**: "Visit Restaurant Website" — opens in-app browser or Safari
 
 ### Behavior
@@ -155,12 +166,6 @@ Grouped list layout (iOS grouped table style).
 **Location**
 - Distance radius: Slider (1mi — 10mi)
 
-**Notifications**
-- Push notification toggle
-
-**Account**
-- Name, email (local-only, no auth)
-
 ### Storage
 
 All settings persisted locally via AsyncStorage. No backend calls for settings in MVP.
@@ -171,12 +176,25 @@ All settings persisted locally via AsyncStorage. No backend calls for settings i
 
 ### Data Flow
 
-1. App gets user's GPS location
-2. App queries a places API (Google Places or Apple MapKit) for nearby restaurants
-3. App fetches chain database from the HealMeal backend (list of known chains with meals/macros)
-4. App matches nearby restaurant results against the chain database by name
-5. Matches are displayed as restaurant cards with their meal data
-6. Restaurants not in the HealMeal DB are excluded. Chains in the DB but not nearby are excluded.
+1. App gets user's GPS location via `expo-location`
+2. App calls `getNearbyRestaurants(lat, lng, radiusMiles)` — a single API call to the HealMeal backend
+3. Backend queries Google Places API (Nearby Search) for restaurants within radius
+4. Backend matches Places results against its chain database using the chain matching algorithm (see below)
+5. Backend returns matched chains with their meals and location data as `NearbyMatch[]`
+6. App displays matches as restaurant cards. Restaurants not in the HealMeal DB are excluded. Chains in the DB but not nearby are excluded.
+
+**For MVP**: The mock API layer returns pre-matched `NearbyMatch[]` objects directly, simulating the future backend behavior.
+
+### Chain Matching Algorithm
+
+The backend matches Google Places results against the chain database:
+
+1. Normalize both strings: lowercase, strip possessives (`'s` → ``), remove punctuation
+2. Check if the normalized Places name contains the chain's canonical name as a substring
+3. Each `Chain` has an `aliases` field for alternate names (e.g., `["Nando's", "Nando's Peri-Peri", "Nandos"]`)
+4. Match succeeds if normalized Places name contains any alias
+
+This runs server-side. The app never sees unmatched restaurants.
 
 ### Types
 
@@ -185,11 +203,12 @@ All settings persisted locally via AsyncStorage. No backend calls for settings i
 interface Chain {
   id: string;
   name: string;
+  aliases: string[];     // Alternate names for matching (e.g., ["Nando's Peri-Peri", "Nandos"])
   logo: string;          // URL
   cuisine: string;
   websiteUrl: string;
   deliveryLinks: {
-    uberEats?: string;
+    uberEats?: string;   // Chain-level search/listing links
     deliveroo?: string;
     doordash?: string;
   };
@@ -225,19 +244,33 @@ interface UserSettings {
   goalWeight: number;
   weightHistory: { date: string; weight: number }[];
   distanceRadius: number;  // miles
-  notificationsEnabled: boolean;
+}
+```
+
+### Default Settings
+
+On first launch, AsyncStorage is empty. The app uses these defaults:
+
+```typescript
+const DEFAULT_SETTINGS: UserSettings = {
+  calorieTarget: 600,
+  highProtein: false,
+  cuisinePreferences: [],       // empty = show all
+  currentWeight: 0,             // 0 = not set, prompt user
+  goalWeight: 0,                // 0 = not set
+  weightHistory: [],
+  distanceRadius: 3,            // miles
 }
 ```
 
 ### API Layer
 
 ```typescript
-// api/client.ts — swap mock for real when backend is ready
-getChains(): Promise<Chain[]>
+// api/client.ts — single function, swap mock for real when backend is ready
 getNearbyRestaurants(lat: number, lng: number, radiusMiles: number): Promise<NearbyMatch[]>
 ```
 
-Mock data lives in `api/mock-data.ts` with realistic chain/meal data for development.
+The mock implementation in `api/mock-data.ts` returns pre-matched `NearbyMatch[]` with realistic chain/meal data, simulating what the real backend will provide. No `getChains()` needed — matching happens server-side.
 
 ---
 
@@ -277,5 +310,6 @@ healmeal/
 - User authentication / accounts
 - Onboarding flow (deep, value-driven — built last)
 - Meals tab (search meals directly across all chains)
-- Me page (calorie breakdown, weight management dashboard, meal scanner, manual meal logging)
+- Me page (calorie breakdown, meal scanner, manual meal logging)
+- Push notifications (no backend to send them yet)
 - Backend integration (mock API for now)
