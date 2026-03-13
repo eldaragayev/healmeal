@@ -14,56 +14,49 @@ export function MacroDisplay({ protein, carbs, fat, size = 'small' }: MacroDispl
   if (size === 'large') {
     return (
       <View style={styles.largeContainer}>
-        <View style={[styles.largeCard, { backgroundColor: colors.proteinBg }]}>
-          <Text style={[styles.largeLabel, { color: colors.textSecondary }]}>PROTEIN</Text>
-          <Text style={[styles.largeValue, { color: colors.protein }]}>{protein}g</Text>
-        </View>
-        <View style={[styles.largeCard, { backgroundColor: colors.carbsBg }]}>
-          <Text style={[styles.largeLabel, { color: colors.textSecondary }]}>CARBS</Text>
-          <Text style={[styles.largeValue, { color: colors.carbs }]}>{carbs}g</Text>
-        </View>
-        <View style={[styles.largeCard, { backgroundColor: colors.fatBg }]}>
-          <Text style={[styles.largeLabel, { color: colors.textSecondary }]}>FAT</Text>
-          <Text style={[styles.largeValue, { color: colors.fat }]}>{fat}g</Text>
-        </View>
+        <MacroCard label="Protein" value={protein} color={colors.protein} bg={colors.proteinBg} />
+        <MacroCard label="Carbs" value={carbs} color={colors.carbs} bg={colors.carbsBg} />
+        <MacroCard label="Fat" value={fat} color={colors.fat} bg={colors.fatBg} />
       </View>
     );
   }
 
+  // Small inline: clean, single-tone, not rainbow
   return (
-    <View style={styles.smallContainer}>
-      <Text style={[styles.smallText, { color: colors.protein }]}>P {protein}g</Text>
-      <Text style={[styles.smallText, { color: colors.carbs }]}>C {carbs}g</Text>
-      <Text style={[styles.smallText, { color: colors.fat }]}>F {fat}g</Text>
+    <Text style={[styles.smallText, { color: colors.textTertiary }]}>
+      {protein}p · {carbs}c · {fat}f
+    </Text>
+  );
+}
+
+function MacroCard({ label, value, color, bg }: { label: string; value: number; color: string; bg: string }) {
+  return (
+    <View style={[styles.largeCard, { backgroundColor: bg }]}>
+      <Text style={[Typography.macro, { color }]}>{value}g</Text>
+      <Text style={[styles.largeLabel, { color }]}>{label}</Text>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  smallContainer: {
-    flexDirection: 'row',
-    gap: 6,
-    marginTop: 6,
-  },
   smallText: {
-    fontSize: 8,
-    fontWeight: '700',
+    ...Typography.macroSmall,
+    marginTop: 4,
   },
   largeContainer: {
     flexDirection: 'row',
-    gap: 8,
+    gap: 10,
   },
   largeCard: {
     flex: 1,
-    borderRadius: 14,
-    padding: 12,
+    borderRadius: 16,
+    paddingVertical: 16,
+    paddingHorizontal: 8,
     alignItems: 'center',
+    gap: 2,
   },
   largeLabel: {
     ...Typography.macroLabel,
-  },
-  largeValue: {
-    ...Typography.macro,
-    marginTop: 2,
+    opacity: 0.7,
   },
 });

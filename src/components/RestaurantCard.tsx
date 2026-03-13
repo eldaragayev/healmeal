@@ -1,7 +1,7 @@
 import { View, Text, ScrollView, StyleSheet, Pressable } from 'react-native';
 import { Image } from 'expo-image';
 import { useState } from 'react';
-import { useThemeColors } from '@/constants/theme';
+import { useThemeColors, Spacing } from '@/constants/theme';
 import { MealCard } from './MealCard';
 import { Meal, NearbyMatch, Filters } from '@/api/types';
 import { filterMeals } from '@/utils/filters';
@@ -21,14 +21,11 @@ export function RestaurantCard({ match, filters, onMealPress, onRestaurantPress 
   if (filteredMeals.length === 0) return null;
 
   return (
-    <View style={styles.card}>
+    <View style={styles.section}>
       {/* Tappable restaurant header */}
       <Pressable
         onPress={() => onRestaurantPress(match)}
-        style={({ pressed }) => [
-          styles.header,
-          { opacity: pressed ? 0.7 : 1 },
-        ]}
+        style={({ pressed }) => [styles.header, { opacity: pressed ? 0.6 : 1 }]}
       >
         {logoFailed ? (
           <View style={[styles.logoFallback, { backgroundColor: colors.brandGreen }]}>
@@ -37,7 +34,7 @@ export function RestaurantCard({ match, filters, onMealPress, onRestaurantPress 
         ) : (
           <Image
             source={{ uri: match.chain.logo }}
-            style={styles.logo}
+            style={[styles.logo, { backgroundColor: colors.accent }]}
             contentFit="cover"
             onError={() => setLogoFailed(true)}
           />
@@ -47,7 +44,7 @@ export function RestaurantCard({ match, filters, onMealPress, onRestaurantPress 
             {match.chain.name}
           </Text>
           <Text style={[styles.subtitle, { color: colors.textTertiary }]}>
-            {match.distance.toFixed(1)} mi · {match.chain.cuisine}
+            {match.distance.toFixed(1)} mi away · {match.chain.cuisine}
           </Text>
         </View>
         <Text style={[styles.chevron, { color: colors.textTertiary }]}>›</Text>
@@ -67,67 +64,57 @@ export function RestaurantCard({ match, filters, onMealPress, onRestaurantPress 
           />
         ))}
       </ScrollView>
-
-      {/* Separator */}
-      <View style={[styles.separator, { backgroundColor: colors.surfaceBorder }]} />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  card: {
-    paddingTop: 4,
+  section: {
+    marginBottom: Spacing.xl,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
-    paddingHorizontal: 20,
-    marginBottom: 12,
+    paddingHorizontal: Spacing.lg,
+    marginBottom: 14,
   },
   logo: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
-    backgroundColor: '#e5e7eb',
+    width: 40,
+    height: 40,
+    borderRadius: 10,
   },
   logoFallback: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
+    width: 40,
+    height: 40,
+    borderRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',
   },
   logoLetter: {
     color: '#fff',
-    fontSize: 20,
-    fontWeight: '800',
+    fontSize: 18,
+    fontWeight: '700',
   },
   headerText: {
     flex: 1,
   },
   name: {
-    fontSize: 16,
-    fontWeight: '700',
+    fontSize: 17,
+    fontWeight: '600',
     letterSpacing: -0.3,
   },
   subtitle: {
-    fontSize: 12,
-    fontWeight: '500',
+    fontSize: 13,
+    fontWeight: '400',
     marginTop: 1,
   },
   chevron: {
-    fontSize: 22,
+    fontSize: 24,
     fontWeight: '300',
   },
   mealScroll: {
-    gap: 12,
-    paddingHorizontal: 20,
-    paddingBottom: 16,
-  },
-  separator: {
-    height: StyleSheet.hairlineWidth,
-    marginHorizontal: 20,
-    marginBottom: 12,
+    gap: 14,
+    paddingHorizontal: Spacing.lg,
   },
 });

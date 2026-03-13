@@ -76,8 +76,7 @@ export function RestaurantDetail({ match, visible, onClose, onMealPress }: Resta
           <GlassButton
             label="Get Directions"
             onPress={openDirections}
-            tint={colors.brandGreen}
-            textColor="#fff"
+            variant="primary"
             style={styles.actionButton}
           />
 

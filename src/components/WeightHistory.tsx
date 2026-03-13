@@ -78,8 +78,7 @@ export function WeightHistory({ history, onAdd, onRemove, onClose }: WeightHisto
         <GlassButton
           label="Add"
           onPress={handleAdd}
-          tint={colors.brandGreen}
-          textColor="#fff"
+          variant="primary"
           style={styles.addButton}
         />
       </View>

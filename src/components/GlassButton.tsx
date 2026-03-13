@@ -1,4 +1,4 @@
-import { Text, Pressable, StyleSheet, Platform, View } from 'react-native';
+import { Text, Pressable, StyleSheet, Platform } from 'react-native';
 import { GlassView, isLiquidGlassAvailable } from 'expo-glass-effect';
 import { useThemeColors } from '@/constants/theme';
 
@@ -7,14 +7,13 @@ const hasGlass = Platform.OS === 'ios' && isLiquidGlassAvailable();
 interface GlassButtonProps {
   label: string;
   onPress: () => void;
-  tint?: string;
-  textColor?: string;
+  variant?: 'default' | 'primary';
   style?: any;
 }
 
-export function GlassButton({ label, onPress, tint, textColor, style }: GlassButtonProps) {
+export function GlassButton({ label, onPress, variant = 'default', style }: GlassButtonProps) {
   const colors = useThemeColors();
-  const resolvedTextColor = textColor || colors.text;
+  const isPrimary = variant === 'primary';
 
   if (hasGlass) {
     return (
@@ -22,10 +21,11 @@ export function GlassButton({ label, onPress, tint, textColor, style }: GlassBut
         <GlassView
           style={styles.button}
           glassEffectStyle="regular"
-          tintColor={tint}
           isInteractive
         >
-          <Text style={[styles.label, { color: resolvedTextColor }]}>{label}</Text>
+          <Text style={[styles.label, { color: isPrimary ? colors.brandGreen : colors.text }]}>
+            {label}
+          </Text>
         </GlassView>
       </Pressable>
     );
@@ -36,16 +36,16 @@ export function GlassButton({ label, onPress, tint, textColor, style }: GlassBut
       onPress={onPress}
       style={({ pressed }) => [
         styles.button,
-        styles.fallbackButton,
-        {
-          backgroundColor: tint || colors.surface,
-          borderColor: colors.surfaceBorder,
-          opacity: pressed ? 0.8 : 1,
-        },
+        isPrimary
+          ? { backgroundColor: colors.brandGreenSoft, borderColor: colors.brandGreenBorder, borderWidth: 1 }
+          : { backgroundColor: colors.surface, borderColor: colors.surfaceBorder, borderWidth: 1 },
+        { opacity: pressed ? 0.7 : 1 },
         style,
       ]}
     >
-      <Text style={[styles.label, { color: resolvedTextColor }]}>{label}</Text>
+      <Text style={[styles.label, { color: isPrimary ? colors.brandGreen : colors.text }]}>
+        {label}
+      </Text>
     </Pressable>
   );
 }
@@ -57,11 +57,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  fallbackButton: {
-    borderWidth: 1,
-  },
   label: {
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: '600',
   },
 });

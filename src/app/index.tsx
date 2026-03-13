@@ -74,8 +74,7 @@ export default function RestaurantsScreen() {
         <GlassButton
           label="Enable Location"
           onPress={requestPermission}
-          tint={colors.brandGreen}
-          textColor="#fff"
+          variant="primary"
         />
       </SafeAreaView>
     );
@@ -93,8 +92,7 @@ export default function RestaurantsScreen() {
         <GlassButton
           label="Open Settings"
           onPress={() => Linking.openSettings()}
-          tint={colors.brandGreen}
-          textColor="#fff"
+          variant="primary"
         />
       </SafeAreaView>
     );
@@ -110,8 +108,7 @@ export default function RestaurantsScreen() {
         <GlassButton
           label="Try Again"
           onPress={retry}
-          tint={colors.brandGreen}
-          textColor="#fff"
+          variant="primary"
         />
       </SafeAreaView>
     );
@@ -120,12 +117,12 @@ export default function RestaurantsScreen() {
   return (
     <SafeAreaView style={[styles.screen, { backgroundColor: colors.background }]} edges={['top']}>
       <View style={styles.header}>
-        <Text style={[Typography.title, { lineHeight: 38 }]}>
+        <Text style={[Typography.largeTitle, { lineHeight: 42 }]}>
           <Text style={{ color: colors.text }}>heal</Text>
           <Text style={{ color: colors.brandGreen }}>meal</Text>
         </Text>
-        <Text style={[styles.headerSubtitle, { color: colors.textSecondary }]}>
-          Within {settings.distanceRadius} miles of you
+        <Text style={[styles.headerSubtitle, { color: colors.textTertiary }]}>
+          Within {settings.distanceRadius} mi
         </Text>
       </View>
 
@@ -191,13 +188,13 @@ const styles = StyleSheet.create({
   },
   header: {
     paddingHorizontal: Spacing.lg,
-    paddingTop: 4,
-    paddingBottom: 14,
+    paddingTop: 8,
+    paddingBottom: 4,
   },
   headerSubtitle: {
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: '500',
-    marginTop: 2,
+    marginTop: 4,
   },
   list: {
     paddingBottom: 40,

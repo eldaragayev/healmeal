@@ -120,8 +120,7 @@ export function MealDetailSheet({ meal, match, visible, onClose }: MealDetailShe
           <GlassButton
             label="📍 Get Directions"
             onPress={openDirections}
-            tint={colors.brandGreen}
-            textColor="#fff"
+            variant="primary"
             style={styles.actionButton}
           />
 

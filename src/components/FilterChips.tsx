@@ -13,13 +13,7 @@ interface FilterChipsProps {
   onToggleCuisine: (cuisine: string | null) => void;
 }
 
-interface ChipProps {
-  label: string;
-  active: boolean;
-  onPress: () => void;
-}
-
-function Chip({ label, active, onPress }: ChipProps) {
+function Chip({ label, active, onPress }: { label: string; active: boolean; onPress: () => void }) {
   const colors = useThemeColors();
 
   if (hasGlass) {
@@ -27,17 +21,11 @@ function Chip({ label, active, onPress }: ChipProps) {
       <Pressable onPress={onPress}>
         <GlassView
           style={styles.chip}
-          glassEffectStyle={active ? 'regular' : 'clear'}
-          tintColor={active ? colors.brandGreen : undefined}
+          glassEffectStyle="regular"
           isInteractive
         >
-          <Text
-            style={[
-              styles.chipText,
-              { color: active ? colors.brandGreen : colors.text },
-            ]}
-          >
-            {label}
+          <Text style={[styles.chipText, { color: active ? colors.brandGreen : colors.text }]}>
+            {active ? '✓ ' : ''}{label}
           </Text>
         </GlassView>
       </Pressable>
@@ -50,25 +38,12 @@ function Chip({ label, active, onPress }: ChipProps) {
       style={[
         styles.chip,
         active
-          ? {
-              backgroundColor: colors.chipActive,
-              borderColor: colors.chipActiveBorder,
-              borderWidth: 1.5,
-            }
-          : {
-              backgroundColor: colors.chipInactive,
-              borderColor: colors.chipInactiveBorder,
-              borderWidth: 1,
-            },
+          ? { backgroundColor: colors.chipActive, borderColor: colors.chipActiveBorder, borderWidth: 1 }
+          : { backgroundColor: colors.chipInactive, borderColor: colors.chipInactiveBorder, borderWidth: 1 },
       ]}
     >
-      <Text
-        style={[
-          styles.chipText,
-          { color: active ? colors.brandGreen : colors.chipInactiveText },
-        ]}
-      >
-        {label}
+      <Text style={[styles.chipText, { color: active ? colors.brandGreen : colors.chipInactiveText }]}>
+        {active ? '✓ ' : ''}{label}
       </Text>
     </Pressable>
   );
@@ -77,11 +52,7 @@ function Chip({ label, active, onPress }: ChipProps) {
 const CALORIE_OPTIONS = [400, 500, 600];
 
 export function FilterChips({
-  filters,
-  cuisines,
-  onToggleCalories,
-  onToggleProtein,
-  onToggleCuisine,
+  filters, cuisines, onToggleCalories, onToggleProtein, onToggleCuisine,
 }: FilterChipsProps) {
   return (
     <ScrollView
@@ -93,15 +64,13 @@ export function FilterChips({
       {CALORIE_OPTIONS.map((cal) => (
         <Chip
           key={`cal-${cal}`}
-          label={`Under ${cal} cal`}
+          label={`< ${cal}`}
           active={filters.maxCalories === cal}
-          onPress={() =>
-            onToggleCalories(filters.maxCalories === cal ? null : cal)
-          }
+          onPress={() => onToggleCalories(filters.maxCalories === cal ? null : cal)}
         />
       ))}
       <Chip
-        label="High Protein"
+        label="Protein"
         active={filters.highProtein}
         onPress={onToggleProtein}
       />
@@ -110,9 +79,7 @@ export function FilterChips({
           key={cuisine}
           label={cuisine}
           active={filters.cuisine === cuisine}
-          onPress={() =>
-            onToggleCuisine(filters.cuisine === cuisine ? null : cuisine)
-          }
+          onPress={() => onToggleCuisine(filters.cuisine === cuisine ? null : cuisine)}
         />
       ))}
     </ScrollView>
@@ -122,24 +89,25 @@ export function FilterChips({
 const styles = StyleSheet.create({
   scroll: {
     overflow: 'visible',
+    flexGrow: 0,
   },
   container: {
     paddingHorizontal: 20,
-    paddingTop: 6,
-    paddingBottom: 14,
+    paddingTop: 8,
+    paddingBottom: 20,
     gap: 8,
     alignItems: 'center',
   },
   chip: {
-    paddingHorizontal: 16,
-    height: 34,
-    borderRadius: 17,
+    paddingHorizontal: 14,
+    height: 36,
+    borderRadius: 18,
     justifyContent: 'center',
     alignItems: 'center',
   },
   chipText: {
-    fontSize: 13,
-    fontWeight: '600',
-    lineHeight: 18,
+    fontSize: 14,
+    fontWeight: '500',
+    lineHeight: 20,
   },
 });
