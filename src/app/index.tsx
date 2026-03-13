@@ -7,22 +7,26 @@ import {
   Pressable,
   ActivityIndicator,
   Linking,
+  Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { GlassView, isLiquidGlassAvailable } from 'expo-glass-effect';
 import { useThemeColors, Typography, Spacing } from '@/constants/theme';
 import { useNearbyChains } from '@/hooks/useNearbyChains';
 import { useSettings } from '@/hooks/useSettings';
 import { RestaurantCard } from '@/components/RestaurantCard';
-import { FilterChips } from '@/components/FilterChips';
+import { FilterSheet } from '@/components/FilterSheet';
 import { MealDetailSheet } from '@/components/MealDetailSheet';
 import { RestaurantDetail } from '@/components/RestaurantDetail';
 import { GlassButton } from '@/components/GlassButton';
 import { Filters, Meal, NearbyMatch } from '@/api/types';
-import { filterRestaurants, filterMeals, getUniqueCuisines } from '@/utils/filters';
+import { filterRestaurants, getUniqueCuisines } from '@/utils/filters';
+
+const hasGlass = Platform.OS === 'ios' && isLiquidGlassAvailable();
 
 export default function RestaurantsScreen() {
   const colors = useThemeColors();
-  const { settings } = useSettings();
+  const { settings, updateSettings } = useSettings();
   const { status, restaurants, isLoading, error, retry, requestPermission } =
     useNearbyChains(settings.distanceRadius);
 
@@ -31,6 +35,7 @@ export default function RestaurantsScreen() {
     highProtein: false,
     cuisine: null,
   });
+  const [filterSheetVisible, setFilterSheetVisible] = useState(false);
 
   const [selectedMeal, setSelectedMeal] = useState<Meal | null>(null);
   const [selectedMatch, setSelectedMatch] = useState<NearbyMatch | null>(null);
@@ -44,6 +49,11 @@ export default function RestaurantsScreen() {
   );
 
   const cuisines = useMemo(() => getUniqueCuisines(restaurants), [restaurants]);
+
+  const activeFilterCount =
+    (filters.maxCalories !== null ? 1 : 0) +
+    (filters.highProtein ? 1 : 0) +
+    (filters.cuisine !== null ? 1 : 0);
 
   const handleMealPress = useCallback((meal: Meal, match: NearbyMatch) => {
     setSelectedMeal(meal);
@@ -62,6 +72,8 @@ export default function RestaurantsScreen() {
     setSelectedMatch(null);
   }, []);
 
+  // --- State screens ---
+
   if (status === 'undetermined') {
     return (
       <SafeAreaView style={[styles.centered, { backgroundColor: colors.background }]}>
@@ -71,11 +83,7 @@ export default function RestaurantsScreen() {
         <Text style={[styles.stateMessage, { color: colors.textSecondary }]}>
           healmeal needs your location to find restaurants near you.
         </Text>
-        <GlassButton
-          label="Enable Location"
-          onPress={requestPermission}
-          variant="primary"
-        />
+        <GlassButton label="Enable Location" onPress={requestPermission} variant="primary" />
       </SafeAreaView>
     );
   }
@@ -83,17 +91,11 @@ export default function RestaurantsScreen() {
   if (status === 'denied') {
     return (
       <SafeAreaView style={[styles.centered, { backgroundColor: colors.background }]}>
-        <Text style={[styles.stateTitle, { color: colors.text }]}>
-          Location Access Denied
-        </Text>
+        <Text style={[styles.stateTitle, { color: colors.text }]}>Location Access Denied</Text>
         <Text style={[styles.stateMessage, { color: colors.textSecondary }]}>
-          Please enable location access in your device settings to use healmeal.
+          Please enable location in your device settings.
         </Text>
-        <GlassButton
-          label="Open Settings"
-          onPress={() => Linking.openSettings()}
-          variant="primary"
-        />
+        <GlassButton label="Open Settings" onPress={() => Linking.openSettings()} variant="primary" />
       </SafeAreaView>
     );
   }
@@ -102,38 +104,62 @@ export default function RestaurantsScreen() {
     return (
       <SafeAreaView style={[styles.centered, { backgroundColor: colors.background }]}>
         <Text style={[styles.stateTitle, { color: colors.text }]}>Oops</Text>
-        <Text style={[styles.stateMessage, { color: colors.textSecondary }]}>
-          {error}
-        </Text>
-        <GlassButton
-          label="Try Again"
-          onPress={retry}
-          variant="primary"
-        />
+        <Text style={[styles.stateMessage, { color: colors.textSecondary }]}>{error}</Text>
+        <GlassButton label="Try Again" onPress={retry} variant="primary" />
       </SafeAreaView>
     );
   }
 
+  // --- Filter button ---
+  const FilterButton = () => {
+    const inner = (
+      <>
+        <Text style={[styles.filterIcon, { color: colors.text }]}>⫶</Text>
+        {activeFilterCount > 0 && (
+          <View style={[styles.filterBadge, { backgroundColor: colors.brandGreen }]}>
+            <Text style={styles.filterBadgeText}>{activeFilterCount}</Text>
+          </View>
+        )}
+      </>
+    );
+
+    if (hasGlass) {
+      return (
+        <Pressable onPress={() => setFilterSheetVisible(true)}>
+          <GlassView style={styles.filterButton} glassEffectStyle="regular" isInteractive>
+            {inner}
+          </GlassView>
+        </Pressable>
+      );
+    }
+
+    return (
+      <Pressable
+        onPress={() => setFilterSheetVisible(true)}
+        style={[styles.filterButton, { backgroundColor: colors.surface, borderColor: colors.surfaceBorder, borderWidth: 1 }]}
+      >
+        {inner}
+      </Pressable>
+    );
+  };
+
   return (
     <SafeAreaView style={[styles.screen, { backgroundColor: colors.background }]} edges={['top']}>
+      {/* Header */}
       <View style={styles.header}>
-        <Text style={[Typography.largeTitle, { lineHeight: 42 }]}>
-          <Text style={{ color: colors.text }}>heal</Text>
-          <Text style={{ color: colors.brandGreen }}>meal</Text>
-        </Text>
-        <Text style={[styles.headerSubtitle, { color: colors.textTertiary }]}>
-          Within {settings.distanceRadius} mi
-        </Text>
+        <View style={styles.headerLeft}>
+          <Text style={[Typography.largeTitle, { lineHeight: 42 }]}>
+            <Text style={{ color: colors.text }}>heal</Text>
+            <Text style={{ color: colors.brandGreen }}>meal</Text>
+          </Text>
+          <Text style={[styles.headerSubtitle, { color: colors.textTertiary }]}>
+            {filteredRestaurants.length} places within {settings.distanceRadius} mi
+          </Text>
+        </View>
+        <FilterButton />
       </View>
 
-      <FilterChips
-        filters={filters}
-        cuisines={cuisines}
-        onToggleCalories={(max) => setFilters((f) => ({ ...f, maxCalories: max }))}
-        onToggleProtein={() => setFilters((f) => ({ ...f, highProtein: !f.highProtein }))}
-        onToggleCuisine={(cuisine) => setFilters((f) => ({ ...f, cuisine }))}
-      />
-
+      {/* Restaurant list */}
       {isLoading ? (
         <View style={styles.centered}>
           <ActivityIndicator size="large" color={colors.brandGreen} />
@@ -141,11 +167,12 @@ export default function RestaurantsScreen() {
       ) : filteredRestaurants.length === 0 ? (
         <View style={styles.centered}>
           <Text style={[styles.stateMessage, { color: colors.textSecondary }]}>
-            No healthy restaurants nearby — try increasing your radius in Settings.
+            No restaurants match your filters.
           </Text>
+          <GlassButton label="Clear Filters" onPress={() => setFilters({ maxCalories: null, highProtein: false, cuisine: null })} />
         </View>
       ) : (
-        <ScrollView contentContainerStyle={styles.list}>
+        <ScrollView contentContainerStyle={styles.list} showsVerticalScrollIndicator={false}>
           {filteredRestaurants.map((match) => (
             <RestaurantCard
               key={match.chain.id}
@@ -158,6 +185,17 @@ export default function RestaurantsScreen() {
         </ScrollView>
       )}
 
+      {/* Modals */}
+      <FilterSheet
+        visible={filterSheetVisible}
+        filters={filters}
+        cuisines={cuisines}
+        calorieTarget={settings.calorieTarget}
+        onFiltersChange={setFilters}
+        onCalorieTargetChange={(val) => updateSettings({ calorieTarget: val })}
+        onClose={() => setFilterSheetVisible(false)}
+      />
+
       <MealDetailSheet
         meal={selectedMeal}
         match={selectedMatch}
@@ -168,37 +206,57 @@ export default function RestaurantsScreen() {
       <RestaurantDetail
         match={restaurantDetailMatch}
         visible={restaurantDetailVisible}
-        onClose={() => {
-          setRestaurantDetailVisible(false);
-          setRestaurantDetailMatch(null);
-        }}
-        onMealPress={(meal, match) => {
-          setRestaurantDetailVisible(false);
-          setRestaurantDetailMatch(null);
-          handleMealPress(meal, match);
-        }}
+        onClose={() => { setRestaurantDetailVisible(false); setRestaurantDetailMatch(null); }}
+        onMealPress={(meal, match) => { setRestaurantDetailVisible(false); setRestaurantDetailMatch(null); handleMealPress(meal, match); }}
       />
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-  },
+  screen: { flex: 1 },
   header: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
     paddingHorizontal: Spacing.lg,
     paddingTop: 8,
-    paddingBottom: 4,
+    paddingBottom: 16,
   },
+  headerLeft: { flex: 1 },
   headerSubtitle: {
     fontSize: 14,
     fontWeight: '500',
     marginTop: 4,
   },
-  list: {
-    paddingBottom: 40,
+  filterButton: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 4,
   },
+  filterIcon: {
+    fontSize: 20,
+    fontWeight: '600',
+  },
+  filterBadge: {
+    position: 'absolute',
+    top: -2,
+    right: -2,
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  filterBadgeText: {
+    color: '#fff',
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  list: { paddingBottom: 40 },
   centered: {
     flex: 1,
     alignItems: 'center',
@@ -207,24 +265,14 @@ const styles = StyleSheet.create({
   },
   stateTitle: {
     fontSize: 20,
-    fontWeight: '800',
+    fontWeight: '700',
     textAlign: 'center',
     marginBottom: 8,
   },
   stateMessage: {
-    fontSize: 14,
-    textAlign: 'center',
-    lineHeight: 20,
-    marginBottom: 20,
-  },
-  stateButton: {
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 12,
-  },
-  stateButtonText: {
-    color: '#fff',
     fontSize: 15,
-    fontWeight: '700',
+    textAlign: 'center',
+    lineHeight: 22,
+    marginBottom: 20,
   },
 });
