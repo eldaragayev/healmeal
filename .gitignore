@@ -38,6 +38,11 @@ yarn-error.*
 
 app-example
 .superpowers/
+.claude/
+.firecrawl/
+.vscode/.react/
+docs/research/
+screenshots/
 
 # generated native folders
 /ios

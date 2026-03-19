@@ -8,22 +8,26 @@ interface GlassButtonProps {
   label: string;
   onPress: () => void;
   variant?: 'default' | 'primary';
+  size?: 'regular' | 'compact';
   style?: any;
 }
 
-export function GlassButton({ label, onPress, variant = 'default', style }: GlassButtonProps) {
+export function GlassButton({ label, onPress, variant = 'default', size = 'regular', style }: GlassButtonProps) {
   const colors = useThemeColors();
   const isPrimary = variant === 'primary';
+  const isCompact = size === 'compact';
+  const buttonStyle = isCompact ? styles.compactButton : styles.button;
+  const textStyle = isCompact ? styles.compactLabel : styles.label;
 
   if (hasGlass) {
     return (
       <Pressable onPress={onPress} style={style}>
         <GlassView
-          style={styles.button}
+          style={buttonStyle}
           glassEffectStyle="regular"
           isInteractive
         >
-          <Text style={[styles.label, { color: isPrimary ? colors.brandGreen : colors.text }]}>
+          <Text style={[textStyle, { color: isPrimary ? colors.brandGreen : colors.text }]}>
             {label}
           </Text>
         </GlassView>
@@ -35,7 +39,7 @@ export function GlassButton({ label, onPress, variant = 'default', style }: Glas
     <Pressable
       onPress={onPress}
       style={({ pressed }) => [
-        styles.button,
+        buttonStyle,
         isPrimary
           ? { backgroundColor: colors.brandGreenSoft, borderColor: colors.brandGreenBorder, borderWidth: 1 }
           : { backgroundColor: colors.surface, borderColor: colors.surfaceBorder, borderWidth: 1 },
@@ -43,7 +47,7 @@ export function GlassButton({ label, onPress, variant = 'default', style }: Glas
         style,
       ]}
     >
-      <Text style={[styles.label, { color: isPrimary ? colors.brandGreen : colors.text }]}>
+      <Text style={[textStyle, { color: isPrimary ? colors.brandGreen : colors.text }]}>
         {label}
       </Text>
     </Pressable>
@@ -52,13 +56,25 @@ export function GlassButton({ label, onPress, variant = 'default', style }: Glas
 
 const styles = StyleSheet.create({
   button: {
-    padding: 14,
-    borderRadius: 14,
+    paddingHorizontal: 20,
+    paddingVertical: 14,
+    borderRadius: 100,
     alignItems: 'center',
     justifyContent: 'center',
   },
   label: {
     fontSize: 16,
+    fontWeight: '600',
+  },
+  compactButton: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 100,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  compactLabel: {
+    fontSize: 15,
     fontWeight: '600',
   },
 });

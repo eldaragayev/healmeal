@@ -1,10 +1,10 @@
-import { View, Text, ScrollView, StyleSheet, Pressable } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, ScrollView, StyleSheet, Pressable, ActivityIndicator } from 'react-native';
 import { Image } from 'expo-image';
-import { useState } from 'react';
 import { useThemeColors, Spacing } from '@/constants/theme';
 import { MealCard } from './MealCard';
 import { Meal, NearbyMatch, Filters } from '@/api/types';
-import { filterMeals } from '@/utils/filters';
+import { useChainMeals } from '@/hooks/useChainMeals';
 
 interface RestaurantCardProps {
   match: NearbyMatch;
@@ -13,12 +13,11 @@ interface RestaurantCardProps {
   onRestaurantPress: (match: NearbyMatch) => void;
 }
 
-export function RestaurantCard({ match, filters, onMealPress, onRestaurantPress }: RestaurantCardProps) {
+export const RestaurantCard = React.memo(function RestaurantCard({ match, filters, onMealPress, onRestaurantPress }: RestaurantCardProps) {
   const colors = useThemeColors();
   const [logoFailed, setLogoFailed] = useState(false);
-  const filteredMeals = filterMeals(match.chain.meals, filters);
-
-  if (filteredMeals.length === 0) return null;
+  // Meals are fetched with sort + macro filters applied server-side
+  const { meals, isLoading, isRefetching } = useChainMeals(match.chain.id, filters, 10);
 
   return (
     <View style={styles.section}>
@@ -40,81 +39,103 @@ export function RestaurantCard({ match, filters, onMealPress, onRestaurantPress 
           />
         )}
         <View style={styles.headerText}>
-          <Text style={[styles.name, { color: colors.text }]}>
+          <Text style={[styles.name, { color: colors.text }]} accessibilityLabel={match.chain.name}>
             {match.chain.name}
           </Text>
           <Text style={[styles.subtitle, { color: colors.textTertiary }]}>
-            {match.distance.toFixed(1)} mi away · {match.chain.cuisine}
+            {match.distance > 0 ? `${match.distance.toFixed(1)} mi · ` : ''}{match.chain.cuisine}
+            {match.chain.approximate ? ' · Based on US menu' : ''}
           </Text>
         </View>
         <Text style={[styles.chevron, { color: colors.textTertiary }]}>›</Text>
       </Pressable>
 
       {/* Meal carousel */}
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.mealScroll}
-      >
-        {filteredMeals.map((meal) => (
-          <MealCard
-            key={meal.id}
-            meal={meal}
-            onPress={(m) => onMealPress(m, match)}
-          />
-        ))}
-      </ScrollView>
+      {meals.length === 0 && isLoading ? (
+        <View style={styles.loadingRow}>
+          <ActivityIndicator size="small" color={colors.textTertiary} />
+        </View>
+      ) : meals.length === 0 ? null : (
+        <>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.mealScroll}
+          >
+            {meals.map((meal) => (
+              <MealCard
+                key={meal.id}
+                meal={meal}
+                onPress={(m) => onMealPress(m, match)}
+              />
+            ))}
+          </ScrollView>
+          {isRefetching && (
+            <ActivityIndicator size="small" color={colors.textTertiary} style={styles.refetchSpinner} />
+          )}
+        </>
+      )}
     </View>
   );
-}
+});
 
 const styles = StyleSheet.create({
   section: {
-    marginBottom: Spacing.xl,
+    marginBottom: Spacing.xxl,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    gap: 14,
     paddingHorizontal: Spacing.lg,
-    marginBottom: 14,
+    marginBottom: 16,
   },
   logo: {
-    width: 40,
-    height: 40,
-    borderRadius: 10,
+    width: 44,
+    height: 44,
+    borderRadius: 12,
   },
   logoFallback: {
-    width: 40,
-    height: 40,
-    borderRadius: 10,
+    width: 44,
+    height: 44,
+    borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
   },
   logoLetter: {
     color: '#fff',
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: '700',
   },
   headerText: {
     flex: 1,
   },
   name: {
-    fontSize: 17,
-    fontWeight: '600',
-    letterSpacing: -0.3,
+    fontSize: 19,
+    fontWeight: '700',
+    letterSpacing: -0.4,
   },
   subtitle: {
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: '400',
-    marginTop: 1,
+    marginTop: 2,
   },
   chevron: {
-    fontSize: 24,
+    fontSize: 26,
     fontWeight: '300',
   },
   mealScroll: {
     gap: 14,
     paddingHorizontal: Spacing.lg,
+  },
+  loadingRow: {
+    height: 60,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  refetchSpinner: {
+    position: 'absolute',
+    bottom: 8,
+    right: 20,
   },
 });

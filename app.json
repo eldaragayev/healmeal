@@ -1,28 +1,30 @@
 {
   "expo": {
-    "name": "HealMeal",
+    "name": "healmeal",
     "slug": "healmeal",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/images/icon2.png",
     "scheme": "healmeal",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "icon": "./assets/expo.icon",
-      "bundleIdentifier": "com.eldaragayev.healmeal"
+      "bundleIdentifier": "com.eldaragayev.healmeal",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSUserTrackingUsageDescription": "This helps us understand which content and features are most useful to you, so we can keep improving HealMeal."
+      }
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/images/android-icon-foreground.png",
-        "backgroundImage": "./assets/images/android-icon-background.png",
-        "monochromeImage": "./assets/images/android-icon-monochrome.png"
+        "backgroundColor": "#f2f5f0",
+        "foregroundImage": "./assets/images/android-icon-foreground.png"
       },
       "predictiveBackGestureEnabled": false,
       "permissions": [
         "android.permission.ACCESS_COARSE_LOCATION",
         "android.permission.ACCESS_FINE_LOCATION"
-      ]
+      ],
+      "package": "com.eldaragayev.healmeal"
     },
     "web": {
       "output": "static",
@@ -33,25 +35,60 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#f2f5f0",
-          "android": {
-            "image": "./assets/images/splash-icon.png",
-            "imageWidth": 76
-          }
+          "image": "./assets/images/splash-icon.png",
+          "imageWidth": 100,
+          "backgroundColor": "#f2f5f0"
         }
       ],
       [
         "expo-location",
         {
-          "locationWhenInUsePermission": "Allow HealMeal to find restaurants near you.",
+          "locationWhenInUsePermission": "Allow healmeal to find restaurants near you.",
           "isIosBackgroundLocationEnabled": false,
           "isAndroidBackgroundLocationEnabled": false
         }
+      ],
+      [
+        "expo-alternate-app-icons",
+        [
+          {
+            "name": "FullBody",
+            "ios": "./assets/images/icon.png"
+          },
+          {
+            "name": "Sparkle",
+            "ios": "./assets/images/icon3.png"
+          },
+          {
+            "name": "StarEyes",
+            "ios": "./assets/images/icon4.png"
+          }
+        ]
+      ],
+      "expo-localization",
+      [
+        "expo-tracking-transparency",
+        {
+          "userTrackingPermission": "This helps us understand which content and features are most useful to you, so we can keep improving HealMeal."
+        }
       ]
     ],
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/6516268d-53bf-4836-abf2-598ba5e8d078",
+      "checkAutomatically": "ON_ERROR_RECOVERY"
+    },
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "6516268d-53bf-4836-abf2-598ba5e8d078"
+      }
     }
   }
 }
